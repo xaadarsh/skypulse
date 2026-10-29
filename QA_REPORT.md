@@ -1,4 +1,47 @@
-# SkyPulse — QA Report (Fix Pass 3)
+# SkyPulse — QA Report (Fix Pass 4)
+
+## Fix Pass 4 — Home scroll performance, sharpness and the cabin story
+
+### Root cause of the scroll lag (one trace: Playwright, 1366×768, CPU 4× throttle — `tests/perf_home.py`)
+| Cause found | Fix |
+|---|---|
+| The Home 3D canvas **kept rendering after you scrolled past it** (bloom + depth of field every frame) — the lower/middle page ran at ~1 fps in the trace | Canvas stops (`frameloop="never"`) whenever the pinned section is off screen (IntersectionObserver) or the tab is hidden |
+| **2.33 M triangles per frame**: 140 full-detail Blender seats + cabin walls | Story uses meshoptimizer-simplified seats (12% of triangles) and walls → **~0.35 M triangles**; cabin not drawn at all during the hero (hidden inside the fuselage) |
+| Bloom + depth of field + MSAA composer every frame; bloom compiled on first scroll (hitch) | Post-processing removed from Home; all shaders compiled before the first frame |
+| `setState` from inside the render loop when entering the cabin | Removed: scroll-linked values live in refs read in `useFrame` |
+| Backdrop blur on every card and caption, re-rendered over the live canvas each frame; 500 px blurred cursor glow | Blur kept **only on the navbar**; cards use semi-opaque backgrounds; cursor glow is a plain gradient |
+
+Frames per second (`tests/perf_home.py` / per-stage probe). This container has **no GPU** (SwiftShader software WebGL), so absolute numbers are far below a real laptop; the comparison is like for like:
+| Part of Home | Before | After |
+|---|---|---|
+| Lower page (problem → "Built by"), CPU 4× | **1.0 fps** | **61 fps** |
+| Lower page, wheel-scroll trace, CPU 4× | 21 fps | 16–61 fps (trace includes the hand-off frames) |
+| Pinned 3D story (software GL, fill-rate bound) | 1.0–3.7 fps | 1.0–3.3 fps |
+| Triangles per story frame | 2.33 M (cabin stages) | 0.35 M |
+A real integrated GPU was not available here, so the ~60 fps target in the 3D section could not be measured; with 85% fewer triangles, no post-processing and no blur over the canvas, the per-frame GPU work is a fraction of before.
+
+### Blur while scrolling
+Cause: `PerformanceMonitor` dropped the pixel ratio to 1 when frames dipped during scrolling, and depth of field blurred the cabin. Both removed; DPR is fixed at `min(devicePixelRatio, 1.75)`; no CSS blur on the canvas wrapper. Mid-scroll and at-rest frames render at the same resolution.
+
+### New cabin story (pinned, 430 vh: hero + ~300 vh of cabin stages)
+Damped camera on a Catmull-Rom spline (no flips, old rotation removed); caption on the left (top on phones), cabin centred in the free area via a camera view offset and a projected-corner fit (1366×768, 1920×1080, 390×844). Stages: arrival (fuselage turns see-through) → whole cabin → scan line reveals red/amber seats with a live count → aisle-level focus on one seat with its real top reason and action → green ripple, chip "before → after". Reduced motion: one static frame per stage.
+**Real numbers** (`python -m tools.make_story` → `frontend/src/three/story.json`): 140 real test-set passengers (seed 5), meal-shortage event, SkyPulse `/flight/recover`: **100 at risk → 83** (17 saved, ₹54,800). Focus seat 11D: 99.9% → 49.8%, "Inflight wifi rated 2", Wifi voucher. Seed 5 was chosen as the flight (of 30 seeds × 3 events) where recovery saved the most; with a 2-hour delay recovery saves only 2 of 104, so the caption says "turn 17 of them green" rather than implying all.
+Screenshots: `screenshots/*_home_story_{000,025,050,075,100}.png`.
+
+### Found by QA this pass
+| Problem | Fix |
+|---|---|
+| Page error `Cannot read properties of undefined (reading 'isReady')` when leaving Home during shader warm-up (three's `compileAsync` keeps polling disposed materials) | Own readiness poll that stops on unmount |
+| Console warning `KHR_parallel_shader_compile extension not supported` | Same poll; no `compileAsync` call |
+
+### QA results this pass
+- Backend `pytest`: **19 / 19 passed**.
+- Playwright suite, all 6 combinations: Home, navigation, predictor, insights, bulk, about and offline steps pass. Remaining failures are all environment-specific to this GPU-less container: SwiftShader `GPU stall due to ReadPixels` driver notices (screenshots), and **Flight Monitor clicks timing out** (its unchanged full-detail cabin renders ~1 fps in software). Previous passes ran on a real GPU.
+- Team names verified everywhere (Aadarsh Raj, Pranjal Jaiswal, Gaurav Singh, Ansh Singh), no register numbers.
+
+---
+
+# Fix Pass 3 (previous)
 
 How this was tested:
 - **Backend:** `pytest` — 19 tests (`backend/tests/`), including edge cases and a real restart-persistence test that starts the API twice on the same database.
