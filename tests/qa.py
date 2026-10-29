@@ -66,6 +66,7 @@ class Session:
         if self.expect_http and ("Failed to load resource" in msg or "status of 4" in msg):
             return  # a test is deliberately sending bad input
         failures.append(f"[{self.tag}] ({getattr(self, 'current', '?')}) {msg}")
+        print("PROBLEM", failures[-1][:300], flush=True)
 
     @contextmanager
     def bad_requests(self):
@@ -129,6 +130,7 @@ class Session:
             notes.append(f"[{self.tag}] ok   {name} ({time.time() - t:.1f}s)")
         except Exception as e:
             failures.append(f"[{self.tag}] FAIL {name}: {type(e).__name__}: {str(e).splitlines()[0][:300]}")
+            print("PROBLEM", failures[-1], flush=True)
             traceback.print_exc(limit=1)
             try:
                 self.shot(f"FAIL_{re.sub('[^a-z0-9]+', '_', name.lower())}")
