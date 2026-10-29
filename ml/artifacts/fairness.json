@@ -1,0 +1,50 @@
+[
+ {
+  "attribute": "Gender",
+  "group": "Female",
+  "n": 13157,
+  "accuracy": 0.9635,
+  "f1": 0.9567,
+  "satisfied_rate": 0.4284
+ },
+ {
+  "attribute": "Gender",
+  "group": "Male",
+  "n": 12819,
+  "accuracy": 0.9632,
+  "f1": 0.9576,
+  "satisfied_rate": 0.4408
+ },
+ {
+  "attribute": "Age group",
+  "group": "<25",
+  "n": 4872,
+  "accuracy": 0.9565,
+  "f1": 0.9201,
+  "satisfied_rate": 0.2777
+ },
+ {
+  "attribute": "Age group",
+  "group": "25-40",
+  "n": 7815,
+  "accuracy": 0.9646,
+  "f1": 0.9535,
+  "satisfied_rate": 0.3869
+ },
+ {
+  "attribute": "Age group",
+  "group": "40-60",
+  "n": 10863,
+  "accuracy": 0.9658,
+  "f1": 0.9699,
+  "satisfied_rate": 0.5753
+ },
+ {
+  "attribute": "Age group",
+  "group": "60+",
+  "n": 2426,
+  "accuracy": 0.9621,
+  "f1": 0.9279,
+  "satisfied_rate": 0.2721
+ }
+]

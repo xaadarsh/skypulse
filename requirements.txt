@@ -1,0 +1,17 @@
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.4
+xgboost>=2.0
+shap>=0.45
+joblib
+fastapi>=0.110
+uvicorn[standard]
+python-multipart
+pytest
+httpx
+matplotlib
+seaborn
+nbformat
+nbconvert
+ipykernel
+playwright

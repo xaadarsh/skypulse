@@ -1,0 +1,204 @@
+{
+ "rows": 129880,
+ "train_rows": 103904,
+ "test_rows": 25976,
+ "satisfied_rate": 0.4345,
+ "missing_arrival_delay": 393,
+ "arrival_delay_train_median": 0.0,
+ "by_class": [
+  {
+   "group": "Eco",
+   "n": 58309,
+   "satisfied_rate": 0.1877
+  },
+  {
+   "group": "Eco Plus",
+   "n": 9411,
+   "satisfied_rate": 0.2464
+  },
+  {
+   "group": "Business",
+   "n": 62160,
+   "satisfied_rate": 0.6944
+  }
+ ],
+ "by_travel_type": [
+  {
+   "group": "Personal",
+   "n": 40187,
+   "satisfied_rate": 0.1013
+  },
+  {
+   "group": "Business",
+   "n": 89693,
+   "satisfied_rate": 0.5837
+  }
+ ],
+ "by_customer_type": [
+  {
+   "group": "Disloyal",
+   "n": 23780,
+   "satisfied_rate": 0.2397
+  },
+  {
+   "group": "Loyal",
+   "n": 106100,
+   "satisfied_rate": 0.4781
+  }
+ ],
+ "by_delay": [
+  {
+   "group": "0",
+   "n": 73356,
+   "satisfied_rate": 0.4594
+  },
+  {
+   "group": "1-15",
+   "n": 27787,
+   "satisfied_rate": 0.4355
+  },
+  {
+   "group": "16-60",
+   "n": 19762,
+   "satisfied_rate": 0.375
+  },
+  {
+   "group": "61-120",
+   "n": 5882,
+   "satisfied_rate": 0.358
+  },
+  {
+   "group": "120+",
+   "n": 3093,
+   "satisfied_rate": 0.3595
+  }
+ ],
+ "by_age": [
+  {
+   "group": "0-10",
+   "n": 3163,
+   "satisfied_rate": 0.1208
+  },
+  {
+   "group": "10-20",
+   "n": 10895,
+   "satisfied_rate": 0.2222
+  },
+  {
+   "group": "20-30",
+   "n": 26822,
+   "satisfied_rate": 0.3643
+  },
+  {
+   "group": "30-40",
+   "n": 26392,
+   "satisfied_rate": 0.4341
+  },
+  {
+   "group": "40-50",
+   "n": 29006,
+   "satisfied_rate": 0.5793
+  },
+  {
+   "group": "50-60",
+   "n": 23548,
+   "satisfied_rate": 0.5733
+  },
+  {
+   "group": "60-70",
+   "n": 9090,
+   "satisfied_rate": 0.1988
+  },
+  {
+   "group": "70-80",
+   "n": 939,
+   "satisfied_rate": 0.2982
+  }
+ ],
+ "ratings_gap": [
+  {
+   "feature": "wifi",
+   "label": "Inflight wifi",
+   "satisfied": 3.16,
+   "dissatisfied": 2.4
+  },
+  {
+   "feature": "time_convenient",
+   "label": "Departure/arrival time",
+   "satisfied": 2.96,
+   "dissatisfied": 3.13
+  },
+  {
+   "feature": "online_booking",
+   "label": "Online booking",
+   "satisfied": 3.03,
+   "dissatisfied": 2.55
+  },
+  {
+   "feature": "gate_location",
+   "label": "Gate location",
+   "satisfied": 2.97,
+   "dissatisfied": 2.98
+  },
+  {
+   "feature": "food",
+   "label": "Food and drink",
+   "satisfied": 3.53,
+   "dissatisfied": 2.96
+  },
+  {
+   "feature": "online_boarding",
+   "label": "Online boarding",
+   "satisfied": 4.03,
+   "dissatisfied": 2.66
+  },
+  {
+   "feature": "seat_comfort",
+   "label": "Seat comfort",
+   "satisfied": 3.97,
+   "dissatisfied": 3.04
+  },
+  {
+   "feature": "entertainment",
+   "label": "Inflight entertainment",
+   "satisfied": 3.96,
+   "dissatisfied": 2.89
+  },
+  {
+   "feature": "onboard_service",
+   "label": "On-board service",
+   "satisfied": 3.86,
+   "dissatisfied": 3.02
+  },
+  {
+   "feature": "leg_room",
+   "label": "Leg room",
+   "satisfied": 3.82,
+   "dissatisfied": 2.99
+  },
+  {
+   "feature": "baggage",
+   "label": "Baggage handling",
+   "satisfied": 3.97,
+   "dissatisfied": 3.37
+  },
+  {
+   "feature": "checkin",
+   "label": "Check-in service",
+   "satisfied": 3.65,
+   "dissatisfied": 3.04
+  },
+  {
+   "feature": "inflight_service",
+   "label": "Inflight service",
+   "satisfied": 3.97,
+   "dissatisfied": 3.39
+  },
+  {
+   "feature": "cleanliness",
+   "label": "Cleanliness",
+   "satisfied": 3.75,
+   "dissatisfied": 2.93
+  }
+ ]
+}

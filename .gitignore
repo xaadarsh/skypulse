@@ -1,0 +1,35 @@
+# Environments & dependencies
+venv/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets
+.env
+.env.*
+
+# Data (downloaded automatically on first run) & local databases
+data/*.csv
+*.db
+
+# Build output
+dist/
+
+# QA temporary outputs
+tests/qa_last_run.log
+tools/lighthouse/
+screenshots/*
+!screenshots/1366_dark_monitor_2_flight.png
+!screenshots/1366_dark_home_1_hero.png
+!screenshots/1366_dark_predictor_2_fix.png
+!screenshots/1366_dark_insights_3_lab.png
+
+# Local / personal
+.claude/
+PRESENTATION_GUIDE.md
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

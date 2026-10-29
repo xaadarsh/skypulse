@@ -1,0 +1,112 @@
+[
+ {
+  "feature": "wifi",
+  "label": "Inflight wifi",
+  "importance": 2.0556
+ },
+ {
+  "feature": "travel_type",
+  "label": "Type of travel",
+  "importance": 1.6719
+ },
+ {
+  "feature": "online_boarding",
+  "label": "Online boarding",
+  "importance": 0.996
+ },
+ {
+  "feature": "customer_type",
+  "label": "Customer type",
+  "importance": 0.8036
+ },
+ {
+  "feature": "travel_class",
+  "label": "Class",
+  "importance": 0.4151
+ },
+ {
+  "feature": "baggage",
+  "label": "Baggage handling",
+  "importance": 0.3626
+ },
+ {
+  "feature": "checkin",
+  "label": "Check-in service",
+  "importance": 0.3055
+ },
+ {
+  "feature": "inflight_service",
+  "label": "Inflight service",
+  "importance": 0.2858
+ },
+ {
+  "feature": "seat_comfort",
+  "label": "Seat comfort",
+  "importance": 0.2756
+ },
+ {
+  "feature": "age",
+  "label": "Age",
+  "importance": 0.2619
+ },
+ {
+  "feature": "entertainment",
+  "label": "Inflight entertainment",
+  "importance": 0.2571
+ },
+ {
+  "feature": "arr_delay",
+  "label": "Arrival delay",
+  "importance": 0.2479
+ },
+ {
+  "feature": "gate_location",
+  "label": "Gate location",
+  "importance": 0.2326
+ },
+ {
+  "feature": "leg_room",
+  "label": "Leg room",
+  "importance": 0.2323
+ },
+ {
+  "feature": "cleanliness",
+  "label": "Cleanliness",
+  "importance": 0.2012
+ },
+ {
+  "feature": "time_convenient",
+  "label": "Departure/arrival time",
+  "importance": 0.1866
+ },
+ {
+  "feature": "online_booking",
+  "label": "Online booking",
+  "importance": 0.1795
+ },
+ {
+  "feature": "onboard_service",
+  "label": "On-board service",
+  "importance": 0.1786
+ },
+ {
+  "feature": "flight_distance",
+  "label": "Flight distance",
+  "importance": 0.126
+ },
+ {
+  "feature": "food",
+  "label": "Food and drink",
+  "importance": 0.0538
+ },
+ {
+  "feature": "dep_delay",
+  "label": "Departure delay",
+  "importance": 0.0394
+ },
+ {
+  "feature": "gender",
+  "label": "Gender",
+  "importance": 0.0168
+ }
+]
