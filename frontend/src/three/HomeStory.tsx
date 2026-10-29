@@ -310,10 +310,21 @@ function Warmup({ onReady }: { onReady: () => void }) {
   useEffect(() => {
     let live = true
     const done = () => { if (live) onReady() }
-    // parallel compile where the GPU supports it; otherwise compile synchronously (three warns if the extension is missing)
-    if (gl.extensions.has('KHR_parallel_shader_compile')) gl.compileAsync(scene, camera).then(done, done)
-    else { gl.compile(scene, camera); done() }
-    return () => { live = false }
+    // like gl.compileAsync, but the readiness poll stops when the canvas unmounts (three's own keeps polling
+    // disposed materials and throws) and it does not warn on GPUs without KHR_parallel_shader_compile
+    const pending = gl.compile(scene, camera)
+    let timer = 0
+    const poll = () => {
+      if (!live) return
+      for (const m of pending) {
+        const program = (gl.properties.get(m) as { currentProgram?: { isReady(): boolean } }).currentProgram
+        if (!program || program.isReady()) pending.delete(m)
+      }
+      if (pending.size) timer = window.setTimeout(poll, 10)
+      else done()
+    }
+    poll()
+    return () => { live = false; clearTimeout(timer) }
   }, [gl, scene, camera, onReady])
   return null
 }
