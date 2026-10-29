@@ -310,7 +310,9 @@ function Warmup({ onReady }: { onReady: () => void }) {
   useEffect(() => {
     let live = true
     const done = () => { if (live) onReady() }
-    gl.compileAsync(scene, camera).then(done, done)
+    // parallel compile where the GPU supports it; otherwise compile synchronously (three warns if the extension is missing)
+    if (gl.extensions.has('KHR_parallel_shader_compile')) gl.compileAsync(scene, camera).then(done, done)
+    else { gl.compile(scene, camera); done() }
     return () => { live = false }
   }, [gl, scene, camera, onReady])
   return null
