@@ -15,13 +15,12 @@ Frames per second (`tests/perf_home.py` / per-stage probe). This container has *
 | Part of Home | Before | After |
 |---|---|---|
 | Lower page (problem → "Built by"), CPU 4× | **1.0 fps** | **61 fps** |
-| Lower page, wheel-scroll trace, CPU 4× | 21 fps | 16–61 fps (trace includes the hand-off frames) |
 | Pinned 3D story (software GL, fill-rate bound) | 1.0–3.7 fps | 1.0–3.3 fps |
 | Triangles per story frame | 2.33 M (cabin stages) | 0.35 M |
 A real integrated GPU was not available here, so the ~60 fps target in the 3D section could not be measured; with 85% fewer triangles, no post-processing and no blur over the canvas, the per-frame GPU work is a fraction of before.
 
 ### Blur while scrolling
-Cause: `PerformanceMonitor` dropped the pixel ratio to 1 when frames dipped during scrolling, and depth of field blurred the cabin. Both removed; DPR is fixed at `min(devicePixelRatio, 1.75)`; no CSS blur on the canvas wrapper. Mid-scroll and at-rest frames render at the same resolution.
+Cause: `PerformanceMonitor` dropped the pixel ratio to 1 when frames dipped during scrolling, and depth of field blurred the cabin. Both removed; DPR is fixed at `min(devicePixelRatio, 1.75)`; no CSS blur on the canvas wrapper. Verified: a frame captured mid-scroll and one at rest have the same edge sharpness (Laplacian variance 1160 vs 1170).
 
 ### New cabin story (pinned, 430 vh: hero + ~300 vh of cabin stages)
 Damped camera on a Catmull-Rom spline (no flips, old rotation removed); caption on the left (top on phones), cabin centred in the free area via a camera view offset and a projected-corner fit (1366×768, 1920×1080, 390×844). Stages: arrival (fuselage turns see-through) → whole cabin → scan line reveals red/amber seats with a live count → aisle-level focus on one seat with its real top reason and action → green ripple, chip "before → after". Reduced motion: one static frame per stage.
@@ -36,7 +35,7 @@ Screenshots: `screenshots/*_home_story_{000,025,050,075,100}.png`.
 
 ### QA results this pass
 - Backend `pytest`: **19 / 19 passed**.
-- Playwright suite, all 6 combinations: Home, navigation, predictor, insights, bulk, about and offline steps pass. Remaining failures are all environment-specific to this GPU-less container: SwiftShader `GPU stall due to ReadPixels` driver notices (screenshots), and **Flight Monitor clicks timing out** (its unchanged full-detail cabin renders ~1 fps in software). Previous passes ran on a real GPU.
+- Playwright suite, all 6 combinations, then 1366-dark re-run after the fixes: Home, navigation, predictor, insights, bulk, about and offline steps pass with no page errors and no app console warnings. Remaining failures are all environment-specific to this GPU-less container: SwiftShader `GPU stall due to ReadPixels` driver notices (screenshots), and **Flight Monitor clicks timing out** (its unchanged full-detail cabin renders ~1 fps in software). Previous passes ran on a real GPU.
 - Team names verified everywhere (Aadarsh Raj, Pranjal Jaiswal, Gaurav Singh, Ansh Singh), no register numbers.
 
 ---
