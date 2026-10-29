@@ -36,14 +36,13 @@ function Nav({ dark, setDark }: { dark: boolean; setDark: (d: boolean) => void }
   const active = (to: string) => (to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(to))
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:pt-4">
-      {/* blurred band behind the pill so scrolled content never shows through around it */}
+      {/* opaque gradient band behind the pill so scrolled content never shows through around it */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-24 sm:h-28" style={{
         background: 'linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 75%, transparent) 55%, transparent 100%)',
-        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
         maskImage: 'linear-gradient(180deg, #000 55%, transparent)', WebkitMaskImage: 'linear-gradient(180deg, #000 55%, transparent)',
       }} />
       <motion.nav aria-label="Main" animate={{ paddingTop: small ? 6 : 10, paddingBottom: small ? 6 : 10 }} transition={{ duration: 0.35, ease }}
-        className="glass-strong pointer-events-auto relative flex w-full max-w-[1100px] items-center gap-2 rounded-full pl-3 pr-2 shadow-[0_20px_60px_-25px_rgba(0,0,0,0.8)] sm:pl-4">
+        className="glass-strong nav-blur pointer-events-auto relative flex w-full max-w-[1100px] items-center gap-2 rounded-full pl-3 pr-2 shadow-[0_20px_60px_-25px_rgba(0,0,0,0.8)] sm:pl-4">
         <NavLink to="/" className="mr-2 flex shrink-0 items-center gap-2.5 font-display text-lg font-semibold">
           <span className="bg-accent grid h-8 w-8 place-items-center rounded-full text-[var(--on-accent)]"><Plane size={16} /></span>
           <span>SkyPulse</span>

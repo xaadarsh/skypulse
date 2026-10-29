@@ -118,7 +118,7 @@ export function CursorGlow() {
   if (reduce) return null
   return (
     <motion.div aria-hidden style={{ x, y }}
-      className="pointer-events-none fixed left-0 top-0 z-0 h-[500px] w-[500px] rounded-full opacity-60 blur-3xl"
+      className="pointer-events-none fixed left-0 top-0 z-0 h-[500px] w-[500px] rounded-full opacity-60"
       >
       <div className="h-full w-full rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--a1) 16%, transparent), transparent 65%)' }} />
     </motion.div>

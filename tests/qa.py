@@ -8,6 +8,7 @@ Run against a QA backend (separate database) and a frontend that proxies to it:
   .venv\\Scripts\\python tests\\qa.py --base http://localhost:5181 [--combos 1366-dark,mobile-light] [--quick]
 """
 import argparse
+import os
 import re
 import sys
 import time
@@ -65,6 +66,7 @@ class Session:
         if self.expect_http and ("Failed to load resource" in msg or "status of 4" in msg):
             return  # a test is deliberately sending bad input
         failures.append(f"[{self.tag}] ({getattr(self, 'current', '?')}) {msg}")
+        print("PROBLEM", failures[-1][:300], flush=True)
 
     @contextmanager
     def bad_requests(self):
@@ -128,6 +130,7 @@ class Session:
             notes.append(f"[{self.tag}] ok   {name} ({time.time() - t:.1f}s)")
         except Exception as e:
             failures.append(f"[{self.tag}] FAIL {name}: {type(e).__name__}: {str(e).splitlines()[0][:300]}")
+            print("PROBLEM", failures[-1], flush=True)
             traceback.print_exc(limit=1)
             try:
                 self.shot(f"FAIL_{re.sub('[^a-z0-9]+', '_', name.lower())}")
@@ -151,11 +154,21 @@ def home(s):
     s.shot("home_1_hero")
     p = s.page
     story = p.evaluate("document.querySelector('[aria-label=\"SkyPulse story\"]').offsetHeight - innerHeight")
-    for f, n in ((0.25, "home_2_flight"), (0.68, "home_3_risk"), (0.95, "home_4_recovered")):
-        p.evaluate(f"window.scrollTo(0, {int(story * f)})")
+    top = p.evaluate("document.querySelector('[aria-label=\"SkyPulse story\"]').getBoundingClientRect().top + scrollY")
+    # cabin section = pinned scroll after the hero (HERO = 0.09 in three/story.ts): 0/25/50/75/100%
+    for k in (0, 25, 50, 75, 100):
+        p.evaluate(f"window.scrollTo(0, {int(top + story * (0.09 + 0.91 * k / 100))})")
         p.wait_for_timeout(2200)
-        if s.theme == "dark" or n == "home_3_risk":
-            s.shot(n)
+        if s.theme == "dark" or k == 50:
+            s.shot(f"home_story_{k:03d}")
+        cap = p.locator("[data-caption]")
+        # the caption card on the left must not cover the cabin's centre of view (right 60% on wide screens)
+        if s.vp != "mobile":
+            for i in range(cap.count()):
+                b = cap.nth(i).bounding_box()
+                op = cap.nth(i).evaluate("e => +getComputedStyle(e.closest('[style*=opacity]') || e).opacity")
+                if b and op > 0.5 and b["x"] + b["width"] > p.viewport_size["width"] * 0.42 and b["y"] < p.viewport_size["height"] - 120:
+                    s.problem(f"story caption overlaps the 3D area at {k}% ({b['x'] + b['width']:.0f}px)")
     p.evaluate("window.scrollTo(0, 0)")
     p.wait_for_timeout(500)
     p.get_by_role("link", name="See the results").click()
@@ -501,7 +514,7 @@ def main():
     SHOTS.mkdir(exist_ok=True)
     files = fixtures()
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(args=["--use-gl=angle", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
+        browser = pw.chromium.launch(executable_path=os.environ.get("CHROMIUM") or None, args=["--use-gl=angle", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
         for combo in ARGS.combos.split(","):
             vp, theme = combo.split("-")
             s = Session(browser, vp, theme)

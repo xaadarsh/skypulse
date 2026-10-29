@@ -115,7 +115,7 @@ export function SortTable<T>({ rows, cols, rowKey, initialSort, maxHeight = 520 
     </ul>
     <div className="hidden overflow-auto rounded-2xl ring-1 ring-inset ring-line sm:block" style={{ maxHeight }} data-lenis-prevent>
       <table className="w-full min-w-[640px] text-[15px]">
-        <thead className="sticky top-0 z-10 bg-surface-strong backdrop-blur">
+        <thead className="sticky top-0 z-10 bg-surface-strong">
           <tr>
             {cols.map((c) => (
               <th key={c.key} scope="col" className={`px-4 py-3 text-[13px] font-semibold uppercase tracking-wider text-muted ${c.align === 'right' ? 'text-right' : 'text-left'}`}
