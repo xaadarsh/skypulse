@@ -1,7 +1,8 @@
 import { useGLTF } from '@react-three/drei'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { MeshoptSimplifier } from 'meshoptimizer'
+import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 /** Models are built by tools/blender/*.py and Draco-compressed; the decoder is bundled in /draco/ (works offline). */
 const DRACO = '/draco/'
@@ -52,4 +53,20 @@ export function useParts(key: keyof typeof MODELS) {
 
 export function useModelScene(key: keyof typeof MODELS) {
   return useGLTF(MODELS[key], DRACO).scene
+}
+
+export const simplifierReady = MeshoptSimplifier.ready
+
+/** Lighter copies of a model's parts (meshoptimizer, error ~1% of the part's size): for views where a seat is
+ *  only a few dozen pixels tall, so 140 full-detail seats (2.3 M triangles) are not drawn every frame. */
+export function simplifyParts(parts: Part[], ratio: number, error = 0.04): Part[] {
+  return parts.map((p) => {
+    const g = p.geometry.index ? p.geometry : mergeVertices(p.geometry)
+    const idx = new Uint32Array(g.index!.array)
+    const target = Math.max(36, Math.floor((idx.length * ratio) / 3) * 3)
+    const [out] = MeshoptSimplifier.simplify(idx, g.attributes.position.array as Float32Array, 3, target, error)
+    const ng = g.clone()
+    ng.setIndex(new THREE.BufferAttribute(out, 1))
+    return { ...p, geometry: ng }
+  })
 }

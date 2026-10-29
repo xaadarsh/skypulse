@@ -1,8 +1,8 @@
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { use, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { useParts, type Part } from './assets'
+import { simplifierReady, simplifyParts, useParts, type Part } from './assets'
 import { armrests, type CabinExtent, type Slot } from './layout'
 
 /** Fabric: matte upholstery tinted per seat (instanceColor) plus a per-seat emissive glow (aGlow). */
@@ -105,11 +105,19 @@ function wallMaterials(parts: Part[]) {
   })
 }
 
-export function CabinModel({ slots, extent, paint, lifts, onPick, onHover, fadeNear = true }: {
+export function CabinModel({ slots, extent, paint, lifts, onPick, onHover, fadeNear = true, lod }: {
   slots: Slot[]; extent: CabinExtent; paint: Paint; lifts?: Float32Array
   onPick?: (i: number) => void; onHover?: (i: number | null, e?: ThreeEvent<PointerEvent>) => void; fadeNear?: boolean
+  /** draw seats with this share of their triangles (Home story) */
+  lod?: number
 }) {
-  const eco = useParts('seatEco'), biz = useParts('seatBiz'), seg = useParts('segment'), front = useParts('front'), rear = useParts('rear'), div = useParts('divider')
+  if (lod) use(simplifierReady)
+  const ecoFull = useParts('seatEco'), bizFull = useParts('seatBiz')
+  const eco = useMemo(() => (lod ? simplifyParts(ecoFull, lod) : ecoFull), [ecoFull, lod])
+  const biz = useMemo(() => (lod ? simplifyParts(bizFull, lod) : bizFull), [bizFull, lod])
+  const segFull = useParts('segment'), frontFull = useParts('front'), rearFull = useParts('rear'), divFull = useParts('divider')
+  // walls are big and smooth: simplify with a tighter error than the seats
+  const [seg, front, rear, div] = useMemo(() => [segFull, frontFull, rearFull, divFull].map((p) => (lod ? simplifyParts(p, 0.3, 0.005) : p)), [segFull, frontFull, rearFull, divFull, lod])
   const fabric = useMemo(fabricMaterial, [])
   useEffect(() => () => fabric.dispose(), [fabric])
   const ecoSlots = useMemo(() => slots.filter((s) => s.kind === 'eco'), [slots])

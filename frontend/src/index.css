@@ -87,16 +87,18 @@ body {
 ::selection { background: color-mix(in srgb, var(--a1) 35%, transparent); }
 
 .glass {
-  background: var(--surface);
+  /* semi-opaque instead of backdrop blur: a blur behind every card is re-rendered on each scroll frame */
+  background: linear-gradient(var(--surface), var(--surface)), color-mix(in srgb, var(--bg) 72%, transparent);
   border: 1px solid var(--line);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
 }
 .glass-strong {
   background: var(--surface-strong);
   border: 1px solid var(--line);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+/* the navbar is the only element that keeps a backdrop blur */
+.nav-blur {
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 .text-gradient {
   background: linear-gradient(100deg, var(--a1), var(--a2));

@@ -1,42 +1,57 @@
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
-import { ArrowDown, ArrowRight, BarChart3, BrainCircuit, FileSpreadsheet, Gauge as GaugeIcon, PlaneTakeoff, Radar, Sparkles, Wallet } from 'lucide-react'
+import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { Armchair, ArrowDown, ArrowRight, BarChart3, BrainCircuit, FileSpreadsheet, Gauge as GaugeIcon, Luggage, MessageSquare, PlaneTakeoff, Radar, Sofa, Sparkles, UtensilsCrossed, Wallet, Wifi } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { TEAM } from '../App'
 import { api, type Insights } from '../api'
 import { Card, ErrorBox, Section, Skeleton } from '../components/ui'
 import { CountUp, Magnetic, Reveal, Tilt } from '../lib/motion'
+import { atRiskFound, atRiskNow, cabinProgress, HERO, STORY } from '../three/story'
 
 const HomeStory = lazy(() => import('../three/HomeStory'))
 
-/** Story caption: left column on wide screens (the 3D sits on the right), top on phones; always on a scrim. */
-function Caption({ p, range, children }: { p: MotionValue<number>; range: [number, number]; children: ReactNode }) {
+const ACTION_ICON = { apology: MessageSquare, meal: UtensilsCrossed, wifi: Wifi, baggage: Luggage, lounge: Sofa, upgrade: Armchair } as const
+const at = (s: number) => HERO + s * (1 - HERO)
+
+/** Story caption: left column on wide screens (the 3D sits centre-right), top on narrower ones; always on a solid card. */
+function Caption({ p, range, children, reduce }: { p: MotionValue<number>; range: [number, number]; children: ReactNode; reduce: boolean }) {
   const [a, b] = range
-  const opacity = useTransform(p, [a, a + 0.03, b - 0.03, b], [0, 1, 1, 0])
-  const y = useTransform(p, [a, b], [24, -24])
+  const end = b >= 1 // the last caption stays until the section unpins
+  const opacity = useTransform(p, end ? [a, a + 0.03] : [a, a + 0.03, b - 0.03, b], end ? [0, 1] : [0, 1, 1, 0])
+  const y = useTransform(p, [a, b], reduce ? [0, 0] : [18, -18])
   return (
-    <motion.div style={{ opacity, y }} className="pointer-events-none absolute inset-x-0 top-24 mx-auto max-w-[1280px] px-5 sm:top-1/2 sm:-translate-y-1/2 sm:px-8">
-      <p className="glass-strong max-w-[26rem] rounded-3xl px-6 py-5 font-display text-xl font-medium leading-snug shadow-2xl sm:text-[26px]">{children}</p>
+    <motion.div style={{ opacity, y }} className="pointer-events-none absolute inset-x-0 top-24 mx-auto max-w-[1280px] px-5 sm:px-8 lg:top-1/2 lg:-translate-y-1/2">
+      <div data-caption className="glass-strong max-w-[min(26rem,100%)] rounded-3xl px-6 py-5 shadow-2xl lg:max-w-[min(26rem,34vw)]">
+        <p className="font-display text-xl font-medium leading-snug sm:text-2xl lg:text-[26px]">{children}</p>
+      </div>
     </motion.div>
   )
 }
 
 function Story() {
   const ref = useRef<HTMLDivElement>(null)
+  const card = useRef<HTMLDivElement>(null)
+  const reduce = !!useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0])
-  const heroY = useTransform(scrollYProgress, [0, 0.12], [0, -80])
-  const flash = useTransform(scrollYProgress, [0.47, 0.53, 0.59], [0, 1, 0])
-  const hint = useTransform(scrollYProgress, [0, 0.04], [1, 0])
-  const captionScrim = useTransform(scrollYProgress, [0.1, 0.15], [0, 1])
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.07], [1, 0])
+  const heroY = useTransform(scrollYProgress, [0, 0.08], [0, reduce ? 0 : -80])
+  const hint = useTransform(scrollYProgress, [0, 0.03], [1, 0])
+  const chipOpacity = useTransform(scrollYProgress, [at(0.13), at(0.17)], [0, 1])
+  const chip = useTransform(scrollYProgress, (p) => {
+    const s = cabinProgress(p, reduce)
+    if (s < 0.4) return `${STORY.passengers} passengers · ${STORY.event.toLowerCase()}`
+    if (s < 0.8) return `At risk: ${atRiskFound(s)}`
+    return `At risk: ${STORY.at_risk_before} → ${atRiskNow(s)}`
+  })
+  const chipDot = useTransform(scrollYProgress, (p) => { const s = cabinProgress(p, reduce); return s < 0.4 ? 'var(--a1)' : s < 0.9 ? 'var(--risk)' : 'var(--safe)' })
+  const F = STORY.focus, ActionIcon = ACTION_ICON[F.action as keyof typeof ACTION_ICON] ?? Sparkles
   return (
-    <section ref={ref} className="relative h-[460vh]" aria-label="SkyPulse story">
+    <section ref={ref} className="relative h-[430vh]" aria-label="SkyPulse story">
       <div className="sticky top-0 h-svh overflow-hidden">
-        <div className="absolute inset-0"><Suspense fallback={null}><HomeStory progress={scrollYProgress} /></Suspense></div>
-        <motion.div aria-hidden style={{ opacity: flash }} className="pointer-events-none absolute inset-0 bg-[var(--bg)]" />
-        <motion.div aria-hidden style={{ opacity: heroOpacity, background: 'linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 38%, transparent 62%)' }} className="pointer-events-none absolute inset-0 hidden sm:block" />
-        <motion.div aria-hidden style={{ opacity: heroOpacity, background: 'linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 75%, transparent) 50%, transparent 72%)' }} className="pointer-events-none absolute inset-0 sm:hidden" />
-        <motion.div style={{ opacity: heroOpacity, y: heroY }} className="absolute inset-0 mx-auto flex max-w-[1280px] flex-col justify-start px-5 pt-28 sm:justify-center sm:px-8 sm:pt-0">
+        <div className="absolute inset-0"><Suspense fallback={null}><HomeStory progress={scrollYProgress} reduce={reduce} card={card} /></Suspense></div>
+        <motion.div aria-hidden style={{ opacity: heroOpacity, background: 'linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 38%, transparent 62%)' }} className="pointer-events-none absolute inset-0 hidden lg:block" />
+        <motion.div aria-hidden style={{ opacity: heroOpacity, background: 'linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 75%, transparent) 50%, transparent 72%)' }} className="pointer-events-none absolute inset-0 lg:hidden" />
+        <motion.div style={{ opacity: heroOpacity, y: heroY }} className="absolute inset-0 mx-auto flex max-w-[1280px] flex-col justify-start px-5 pt-28 sm:px-8 lg:justify-center lg:pt-0">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brand">AI Passenger Care System</p>
           <h1 className="mt-4 max-w-3xl font-display text-[48px] font-semibold leading-[0.98] tracking-tight sm:text-[72px] lg:text-[88px]">
             Know who’s unhappy <span className="text-gradient">before they land.</span>
@@ -50,15 +65,27 @@ function Story() {
             <a href="#problem" onClick={(e) => { const l = (window as unknown as { lenis?: { scrollTo: (t: Element, o: { offset: number }) => void } }).lenis; const t = document.getElementById('problem'); if (l && t) { e.preventDefault(); l.scrollTo(t, { offset: -112 }) } }} className="glass inline-flex h-14 items-center gap-2 rounded-full px-7 text-base font-semibold hover:bg-surface-hover">See the results</a>
           </div>
         </motion.div>
-        <motion.div aria-hidden style={{ opacity: captionScrim, background: 'linear-gradient(90deg, color-mix(in srgb, var(--bg) 85%, transparent) 0%, color-mix(in srgb, var(--bg) 40%, transparent) 34%, transparent 52%)' }} className="pointer-events-none absolute inset-0 hidden sm:block" />
-        <motion.div aria-hidden style={{ opacity: captionScrim, background: 'linear-gradient(180deg, color-mix(in srgb, var(--bg) 85%, transparent) 0%, transparent 42%)' }} className="pointer-events-none absolute inset-0 sm:hidden" />
         <motion.div style={{ opacity: hint }} className="absolute inset-x-0 bottom-8 hidden flex-col items-center gap-2 text-sm text-muted sm:flex">
-          Scroll to fly <motion.span animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}><ArrowDown size={18} /></motion.span>
+          Scroll to fly <motion.span animate={reduce ? undefined : { y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}><ArrowDown size={18} /></motion.span>
         </motion.div>
-        <Caption p={scrollYProgress} range={[0.14, 0.32]}>Cruising at 36,000 ft with 120 passengers on board.</Caption>
-        <Caption p={scrollYProgress} range={[0.34, 0.48]}>SkyPulse looks inside the cabin — while the flight is still in the air.</Caption>
-        <Caption p={scrollYProgress} range={[0.6, 0.76]}><span className="text-risk">Red seats</span> are passengers our model predicts will leave unhappy.</Caption>
-        <Caption p={scrollYProgress} range={[0.8, 0.99]}>Recovery actions turn them <span className="text-safe">green</span> — before landing.</Caption>
+        <Caption p={scrollYProgress} reduce={reduce} range={[at(0), at(0.15)]}>SkyPulse looks inside the cabin — while the flight is still in the air.</Caption>
+        <Caption p={scrollYProgress} reduce={reduce} range={[at(0.15), at(0.4)]}>Every seat is a real passenger from our data.</Caption>
+        <Caption p={scrollYProgress} reduce={reduce} range={[at(0.4), at(0.6)]}><span className="text-risk">Red seats</span> are passengers our model predicts will leave unhappy.</Caption>
+        <Caption p={scrollYProgress} reduce={reduce} range={[at(0.6), at(0.8)]}>For each one, SkyPulse explains why — and picks a recovery action.</Caption>
+        <Caption p={scrollYProgress} reduce={reduce} range={[at(0.8), 1]}>Recovery actions turn <span className="num">{STORY.saved}</span> of them <span className="text-safe">green</span> — before landing.</Caption>
+        {/* focus card: positioned next to its seat every frame by the 3D scene */}
+        <div ref={card} aria-hidden className="glass-strong pointer-events-none absolute left-0 top-0 w-64 rounded-2xl p-4 shadow-2xl" style={{ opacity: 0, visibility: 'hidden' }}>
+          <div className="flex items-center justify-between text-sm"><span className="font-semibold">Seat {F.seat}</span><span className="num text-risk">{Math.floor(F.risk_before * 100)}% risk</span></div>
+          <p className="mt-2 text-sm text-muted">Top reason: <span className="text-ink">{F.reason}</span></p>
+          <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-safe"><span className="grid h-8 w-8 place-items-center rounded-full bg-[color-mix(in_srgb,var(--safe)_18%,transparent)]"><ActionIcon size={16} /></span>{F.action_label} → <span className="num">{Math.floor(F.risk_after * 100)}%</span></div>
+        </div>
+        <motion.div style={{ opacity: chipOpacity }} className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center lg:justify-end lg:px-10">
+          <div className="glass-strong flex items-center gap-3 rounded-full px-5 py-3 shadow-xl">
+            <motion.span className="h-2.5 w-2.5 rounded-full" style={{ background: chipDot }} />
+            <motion.span className="num font-semibold">{chip}</motion.span>
+            <span className="hidden text-sm text-muted sm:inline">{STORY.flight} · {STORY.route}</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
